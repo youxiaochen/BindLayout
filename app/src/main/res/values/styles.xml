@@ -1,0 +1,34 @@
+<resources>
+
+    <!-- Toolbar样式基类 -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- toolbar颜色 -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <!-- 状态栏颜色 -->
+        <item name="colorPrimaryDark">@color/colorAccent</item>
+        <!-- 窗口的背景颜色 -->
+        <item name="android:windowBackground">@color/base_background</item>
+        <!-- 低版本去掉阴影 -->
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+
+    <style name="baseDialog" parent="android:style/Theme.Dialog">
+        <!-- 边框 -->
+        <item name="android:windowFrame">@null</item>
+        <!-- 无标题 -->
+        <item name="android:windowNoTitle">true</item>
+        <!-- 背影 -->
+        <item name="android:windowBackground">@color/white</item>
+        <!-- actionbar -->
+        <item name="windowActionBar">false</item>
+        <!-- true弹出时覆盖部分布局,false则不符盖将原有布局下移 -->
+        <item name="windowActionModeOverlay">true</item>
+        <!-- 自定义Titlebar时去掉多余的阴影 -->
+        <item name="android:windowContentOverlay">@null</item>
+        <!-- 软键盘弹出方式 -->
+        <item name="android:windowSoftInputMode">stateUnspecified|adjustPan</item>
+        <!-- 窗体外点击消失 -->
+        <item name="android:windowCloseOnTouchOutside">true</item>
+    </style>
+
+</resources>
