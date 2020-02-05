@@ -58,7 +58,7 @@ public abstract class ToolbarActivity extends AppCompatActivity {
     protected int getLayoutResId() {
         long c = System.currentTimeMillis();
         int id = LayoutResIds.layoutId(this.getClass());
-        Log.i("youmvp", "LayourResIds layout time = " + (System.currentTimeMillis() - c));
+        Log.i("youmvp", id + " LayourResIds layout time = " + (System.currentTimeMillis() - c));
         return id;
     }
 
@@ -68,7 +68,7 @@ public abstract class ToolbarActivity extends AppCompatActivity {
     protected int getActionBarResId() {
         long c = System.currentTimeMillis();
         int id = LayoutResIds.actionbarId(this.getClass());
-        Log.i("youmvp", "LayourResIds actionbarId time = " + (System.currentTimeMillis() - c));
+        Log.i("youmvp", id + " LayourResIds actionbarId time = " + (System.currentTimeMillis() - c));
         return id;
     }
 

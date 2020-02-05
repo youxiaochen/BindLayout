@@ -10,7 +10,7 @@ import chen.you.bindlayout.base.ToolbarActivity;
 /**
  * Created by Max on 2020/2/2.
  */
-@BindLayout(layoutResId = R.layout.dialog_test, actionBarResId = R.layout.actionbar_main)
+@BindLayout(layout = R.layout.activity_abs, actionBar = R.layout.actionbar_main)
 public abstract class AbsActivity extends ToolbarActivity {
 
     @BindView(R.id.tv)

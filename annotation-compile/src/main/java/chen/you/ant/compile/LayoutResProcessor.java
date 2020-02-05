@@ -1,9 +1,16 @@
 package chen.you.ant.compile;
 
 import com.google.auto.service.AutoService;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.FieldSpec;
+import com.squareup.javapoet.JavaFile;
+import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.TypeSpec;
 
 import java.io.IOException;
-import java.io.Writer;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -12,8 +19,8 @@ import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
-import javax.tools.JavaFileObject;
 
 import chen.you.ant.layoutres.BindLayout;
 
@@ -22,62 +29,13 @@ import chen.you.ant.layoutres.BindLayout;
  */
 @AutoService(Processor.class)
 public final class LayoutResProcessor extends AbstractProcessor {
+    static final String PACKAGE = "chen.you.ant.layoutres";
+    static final String CLASS = "LayoutResIds";
     /**
-     * package包名目录
+     * 静态代码
      */
-    static final String PACKAGE = "package chen.you.ant.layoutres;\n\n";
-    /**
-     * import导入
-     */
-    static final String IMPORT = "import java.util.HashMap;\n\n";
-    /**
-     * 包名完整路径
-     */
-    static final String CLASS = "chen.you.ant.layoutres.LayoutResIds";
-    /**
-     * class类的前部与尾部
-     */
-    static final String PUBLIC_CLASS = "public final class LayoutResIds {\n\n" +
-            "    private LayoutResIds() {\n" +
-            "        throw new AssertionError(\"No LayoutRes instances.\");\n" +
-            "    }\n\n" +
-            "    private static HashMap<String, Integer> lrMap = new HashMap<>();\n" +
-            "    private static HashMap<String, Integer> abMap = new HashMap<>();";
-
-//    static final String CLASS_END = "\n\n    public static int layoutId(Class clazz) {\n" +
-//            "        Integer value = lrMap.get(ResUtils.encry(clazz.getName()));\n" +
-//            "        if (value == null) return 0;\n" +
-//            "        return value;\n" +
-//            "    }\n\n" +
-//            "    public static int actionbarId(Class clazz) {\n" +
-//            "        Integer value = abMap.get(ResUtils.encry(clazz.getName()));\n" +
-//            "        if (value == null) return 0;\n" +
-//            "        return value;\n" +
-//            "    }\n\n}";
-
-    static final String CLASS_END = "\n\n    public static int layoutId(Class clazz) {\n" +
-            "        if (clazz == null) return 0;\n" +
-            "        Integer value = lrMap.get(ResUtils.encry(clazz.getName()));\n" +
-            "        if (value == null) return layoutId(clazz.getSuperclass());\n" +
-            "        return value;\n" +
-            "    }\n" +
-            "\n" +
-            "    public static int actionbarId(Class clazz) {\n" +
-            "        if (clazz == null) return 0;\n" +
-            "        Integer value = abMap.get(ResUtils.encry(clazz.getName()));\n" +
-            "        if (value == null) return actionbarId(clazz.getSuperclass());\n" +
-            "        return value;\n" +
-            "    }\n\n}";
-    /**
-     * 表态代码块
-     */
-    static final String STATIC_START = "\n\n    static {";
-    static final String STATIC_END = "\n    }";
-    /**
-     * 表态代码块
-     */
-    static final String LAYOUT_MAP_FORMAT = "\n        lrMap.put(\"%s\", %d);";
-    static final String ACTIONBAR_MAP_FORMAT = "\n        abMap.put(\"%s\", %d);";
+    static final String LAYOUT_MAP_FORMAT = "lrMap.put(\"%s\", %d);\n";
+    static final String ACTIONBAR_MAP_FORMAT = "abMap.put(\"%s\", %d);\n";
 
     @Override
     public Set<String> getSupportedAnnotationTypes() {
@@ -93,34 +51,71 @@ public final class LayoutResProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> set, RoundEnvironment roundEnvironment) {
-        StringBuffer sb = new StringBuffer(PACKAGE).append(IMPORT).append(PUBLIC_CLASS);
+        ClassName hashMapName = ClassName.get(HashMap.class);
+        ParameterizedTypeName mapName = ParameterizedTypeName.get(hashMapName, ClassName.get(String.class), ClassName.get(Integer.class));
+
+        FieldSpec layoutSpec = FieldSpec.builder(mapName, "lrMap", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
+                .initializer("new $T<>()", hashMapName).build();
+        FieldSpec actionbarSpec = FieldSpec.builder(mapName, "abMap", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
+                .initializer("new $T<>()", hashMapName).build();
+        FieldSpec initializedSpec = FieldSpec.builder(TypeName.BOOLEAN, "initialized", Modifier.PRIVATE, Modifier.STATIC)
+                .build();
+
+        MethodSpec construct = MethodSpec.constructorBuilder().addModifiers(Modifier.PRIVATE)
+                .addCode("throw new AssertionError(\"No LayoutResIds instances.\");\n")
+                .build();
+
+        MethodSpec layoutMethod = MethodSpec.methodBuilder("layoutId")
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .addParameter(Class.class, "clazz")
+                .returns(TypeName.INT)
+                .addCode("if (clazz == null) return 0;\n" +
+                        "Integer value = lrMap.get(ResUtils.encry(clazz.getName()));\n" +
+                        "if (value == null) return layoutId(clazz.getSuperclass());\n" +
+                        "return value;\n")
+                .build();
+
+        MethodSpec actionbarMethod = MethodSpec.methodBuilder("actionbarId")
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .addParameter(Class.class, "clazz")
+                .returns(TypeName.INT)
+                .addCode("if (clazz == null) return 0;\n" +
+                        "Integer value = abMap.get(ResUtils.encry(clazz.getName()));\n" +
+                        "if (value == null) return actionbarId(clazz.getSuperclass());\n" +
+                        "return value;\n")
+                .build();
+
+        MethodSpec.Builder bindMethodBuilder = MethodSpec.methodBuilder("bind")
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .addCode("if (initialized) return;\ninitialized = true;\n")
+                .returns(TypeName.VOID);
 
         Set<? extends Element> elements = roundEnvironment.getElementsAnnotatedWith(BindLayout.class);
         if (elements != null || elements.size() > 0) {
-            sb.append(STATIC_START);
             for (Element e : elements) {
                 String putKey = ResUtils.encry(e.toString());
                 BindLayout inject = e.getAnnotation(BindLayout.class);
-                int layoutResId = inject.layoutResId();
+                int layoutResId = inject.layout();
                 if (layoutResId != 0) {
-                    sb.append(String.format(LAYOUT_MAP_FORMAT, putKey, layoutResId));
+                    bindMethodBuilder.addCode(String.format(LAYOUT_MAP_FORMAT, putKey, layoutResId));
                 }
                 //actionbar...
-                int actionbarId = inject.actionBarResId();
+                int actionbarId = inject.actionBar();
                 if (actionbarId != 0) {
-                    sb.append(String.format(ACTIONBAR_MAP_FORMAT, putKey, actionbarId));
+                    bindMethodBuilder.addCode(String.format(ACTIONBAR_MAP_FORMAT, putKey, actionbarId));
                 }
             }
-            sb.append(STATIC_END);
         }
 
-        sb.append(CLASS_END);
-        //System.err.println(sb.toString());
+        TypeSpec typeSpec = TypeSpec.classBuilder(CLASS).addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+                .addField(layoutSpec).addField(actionbarSpec).addField(initializedSpec)
+                .addMethod(construct).addMethod(bindMethodBuilder.build())
+                .addMethod(layoutMethod).addMethod(actionbarMethod)
+                .build();
+
         try {
-            JavaFileObject sourceFile = processingEnv.getFiler().createSourceFile(CLASS);
-            Writer writer = sourceFile.openWriter();
-            writer.write(sb.toString());
-            writer.close();
+            JavaFile javaFile = JavaFile.builder(PACKAGE, typeSpec).build();
+            javaFile.writeTo(processingEnv.getFiler());
         } catch (IOException e) {
             e.printStackTrace();
         }

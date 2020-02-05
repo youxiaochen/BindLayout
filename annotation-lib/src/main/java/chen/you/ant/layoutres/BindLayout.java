@@ -16,12 +16,12 @@ public @interface BindLayout {
      * 内容资源布局
      * @return
      */
-    int layoutResId() default 0;
+    int layout() default 0;
 
     /**
      * actionBar资源布局,或用于其他资源布局
      * @return
      */
-    int actionBarResId() default 0;
+    int actionBar() default 0;
 
 }

@@ -1,14 +1,17 @@
 package chen.you.bindlayout.ui;
 
 
+import android.support.annotation.LayoutRes;
 import android.view.View;
 
 import butterknife.OnClick;
+import butterknife.internal.Utils;
 import chen.you.ant.layoutres.BindLayout;
+import chen.you.ant.layoutres.LayoutResIds;
 import chen.you.bindlayout.R;
 import chen.you.bindlayout.base.ToolbarActivity;
 
-@BindLayout(layoutResId = R.layout.activity_main, actionBarResId = R.layout.actionbar_main)
+@BindLayout(layout = R.layout.activity_main, actionBar = R.layout.actionbar_main)
 public class MainActivity extends ToolbarActivity {
 
     @Override
@@ -19,7 +22,11 @@ public class MainActivity extends ToolbarActivity {
 
     @OnClick(R.id.bt1)
     public void onClick(View v) {
+        //Layout
+        //LayoutResIds
         SecondActivity.lanuch(this);
+
+
     }
 
 }

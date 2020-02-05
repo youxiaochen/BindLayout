@@ -11,7 +11,7 @@ import chen.you.bindlayout.base.BaseFragment;
  * Created by Max on 2020/2/2.
  */
 
-@BindLayout(layoutResId = R.layout.fragment_test)
+@BindLayout(layout = R.layout.fragment_test)
 public class TestFragment extends BaseFragment {
 
     public static TestFragment newInstance() {

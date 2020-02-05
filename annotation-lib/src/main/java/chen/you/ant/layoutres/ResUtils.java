@@ -11,6 +11,8 @@ public final class ResUtils {
 
     private ResUtils() {}
 
+    static char hexDigits[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+
     /**
      * md5加密
      * @param instr
@@ -18,7 +20,6 @@ public final class ResUtils {
      */
     static String encry(String instr) {
         if (instr == null) return null;
-        char hexDigits[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
         try {
             byte[] btInput = instr.getBytes();
             // 获得MD5摘要算法的 MessageDigest 对象
